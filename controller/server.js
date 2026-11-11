@@ -38,7 +38,7 @@ export function createController({ root, refreshS, timeoutMs, overrides, self, t
 
   const runner = createRunner({
     spawn: spawnFn, now, timeoutMs, log,
-    onEnd: () => { refresh().catch((e) => log('refresh_failed', { message: String(e.message).slice(0, 200) })); },
+    onEnd: () => refreshLogged(),
   });
 
   async function rediscover() {
@@ -61,6 +61,9 @@ export function createController({ root, refreshS, timeoutMs, overrides, self, t
     })();
     return inflight;
   }
+
+  // For background refreshes: nobody awaits them, so a failure is logged here.
+  const refreshLogged = () => refresh().catch((e) => log('refresh_failed', { message: String(e.message).slice(0, 200) }));
 
   function labView(l) {
     const op = runner.current();
@@ -154,7 +157,7 @@ export function createController({ root, refreshS, timeoutMs, overrides, self, t
     });
   });
 
-  return { server, refresh, runner, rediscover, registry: () => registry };
+  return { server, refresh, refreshLogged, runner, rediscover, registry: () => registry };
 }
 
 async function main() {
@@ -176,7 +179,7 @@ async function main() {
   const c = createController({ root, refreshS, timeoutMs: Number(conf.VLIX_OP_TIMEOUT_S ?? 1800) * 1000, overrides, self: project, token });
   await c.refresh();
   log('labs_discovered', { eligible: c.registry().labs.length, excluded: c.registry().excluded.length });
-  const timer = setInterval(() => c.refresh().catch((e) => log('refresh_failed', { message: String(e.message).slice(0, 200) })), refreshS * 1000);
+  const timer = setInterval(c.refreshLogged, refreshS * 1000);
   c.server.listen(port, '127.0.0.1', () => log('controller_started', { port, root }));
 
   let stopping = false;

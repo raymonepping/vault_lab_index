@@ -16,7 +16,7 @@ Nothing else. The portal never runs `reset`, `clean`, `clean-slate`,
 
 ```sh
 make check RUNTIME=podman   # podman, the machine, make, node, config
-make up RUNTIME=podman      # builds vlix-ui on first use, starts both parts
+make up RUNTIME=podman      # (re)builds vlix-ui when ui/ changed, starts both parts
 open http://127.0.0.1:18800
 make down RUNTIME=podman    # stops the portal only; labs keep running
 ```

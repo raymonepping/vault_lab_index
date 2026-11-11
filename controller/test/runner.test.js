@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
-import { createRunner, commandFor, BusyError } from '../lib/runner.js';
+import { createRunner, commandFor, BusyError, MAX_LINES } from '../lib/runner.js';
 
 function fakeSpawn() {
   const calls = [];
@@ -78,16 +78,16 @@ test('a timeout stops the whole process group, then kills it', async () => {
   assert.equal(r.latest().state, 'timed-out');
 });
 
-test('only the last 200 lines are kept', async () => {
+test('only the last MAX_LINES lines are kept', async () => {
   const spawn = fakeSpawn();
   const r = createRunner({ spawn });
   r.start(lab, 'up');
   const { child } = spawn.calls[0];
-  child.stdout.write(Array.from({ length: 250 }, (_, i) => `line ${i}`).join('\n') + '\n');
+  child.stdout.write(Array.from({ length: MAX_LINES + 50 }, (_, i) => `line ${i}`).join('\n') + '\n');
   end(child, 0);
   await new Promise((ok) => setTimeout(ok, 10));
   const { lines } = r.latest();
-  assert.equal(lines.length, 200);
+  assert.equal(lines.length, MAX_LINES);
   assert.equal(lines[0], 'line 50');
 });
 

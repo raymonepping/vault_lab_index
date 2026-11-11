@@ -44,7 +44,7 @@ export function describe(readme) {
     if (fence) continue;
     const l = raw.trim();
     if (!l) { if (para.length) break; continue; }
-    if (/^(#|>|!\[|\[!\[|<|\||[-*+] |\d+\. |<!--)/.test(l)) { if (para.length) break; continue; }
+    if (/^(#|>|!\[|\[!\[|<|\||[-*+] |\d+\. )/.test(l)) { if (para.length) break; continue; }
     para.push(l);
   }
   let description = para.join(' ')

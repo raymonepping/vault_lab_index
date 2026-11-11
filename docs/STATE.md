@@ -156,3 +156,22 @@ also removed the test's double start.
 
 Results: `make verify` green (27 unit, boundary 26/26, typecheck, gitleaks);
 `make test-ui` 16/16; `vlix-ui` rebuilt, healthy, `Host: evil.example` 400.
+
+### Round 2 (after 343624c)
+
+| # | Finding | Fix |
+| --- | --- | --- |
+| 14 | The 200-line limit was written twice (runner, test) | test imports `MAX_LINES` |
+| 15 | Dead `<!--` branch in the README reader's regex | deleted |
+| 16 | `make up` kept serving an old image after `ui/` changed | `.build/ui-image.stamp` depends on `ui/` sources; `clean` removes it |
+| 17 | The refresh error logger was written twice | `refreshLogged()` in one place |
+| 18 | The e2e console guard also hid 404s for fonts and scripts | it skips only the offline test's 503 |
+| 19 | The dashboard proxy logged nothing on 502 or 503 | one JSON line (route and reason, no token, no body) |
+
+Security pass: no new findings.
+
+Results: `make verify` green (27 unit, boundary 26/26, typecheck, gitleaks);
+`make test-ui` 16/16; `make up` rebuilt once after the `ui/` change and not
+on the second run; with the controller stopped, `vlix-ui` logged
+`controller_offline` (`no token file`) and answered 503; `Host:
+evil.example` 400.

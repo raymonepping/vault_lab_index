@@ -30,6 +30,8 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, r.status)
     return await r.json()
   } catch (e) {
+    // One line for make logs: the route and why, never the token or a body.
+    console.error(JSON.stringify({ ts: new Date().toISOString(), event: e instanceof ControllerOffline ? 'controller_offline' : 'controller_bad_answer', method, path, reason: e instanceof ControllerOffline ? e.message : (e as Error).name }))
     if (e instanceof ControllerOffline) return refuse(event, 503, 'controller-offline', 'the host controller is not running; run make up')
     return refuse(event, 502, 'bad-gateway', 'the controller sent an unreadable answer')
   }

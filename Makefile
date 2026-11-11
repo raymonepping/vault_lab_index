@@ -4,6 +4,9 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 RUNTIME ?= podman
 IMAGE := vlix-ui:local
+# The image is rebuilt when any source under ui/ is newer than the last build.
+UI_STAMP := .build/ui-image.stamp
+UI_SOURCES := $(shell find ui -type f -not -path 'ui/node_modules/*' -not -path 'ui/.output/*' -not -path 'ui/.nuxt/*' -not -path 'ui/.data/*' -not -name '._*' -not -name .DS_Store)
 -include config/defaults.conf
 -include .env
 export NODE_IMAGE
@@ -30,8 +33,12 @@ check: ## Podman client and machine, GNU Make, Node >= 24, config, controller
 build: ## Build vlix-ui:local (arm64, Docker format so the HEALTHCHECK stays)
 	@xattr -rc ui 2>/dev/null || true
 	@COPYFILE_DISABLE=1 podman build --format docker --platform linux/arm64 --build-arg NODE_IMAGE=$(NODE_IMAGE) --tag $(IMAGE) --file ui/Containerfile ui
+	@mkdir -p .build && touch $(UI_STAMP)
 
-up: ## Start the controller (host) and vlix-ui (Podman); print the URL
+$(UI_STAMP): $(UI_SOURCES)
+	@$(MAKE) --no-print-directory build
+
+up: $(UI_STAMP) ## Start the controller (host) and vlix-ui (Podman); print the URL
 	@podman image exists $(IMAGE) || $(MAKE) --no-print-directory build
 	@scripts/controller.sh start
 	@scripts/compose.sh app up -d
@@ -54,6 +61,7 @@ logs: ## The controller's JSON events and vlix-ui's log (no make output, no toke
 clean: down ## Stop, then remove the vlix-ui image only (no volumes, no prune)
 	@case "$(IMAGE)" in vlix-*) ;; *) echo "refusing: $(IMAGE) is not a vlix- image" >&2; exit 1 ;; esac
 	@podman image rm --ignore $(IMAGE)
+	@rm -f $(UI_STAMP)
 
 test: ## Controller unit tests
 	@node --test 'controller/test/*.test.js'

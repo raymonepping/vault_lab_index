@@ -27,12 +27,12 @@ test.beforeAll(() => {
 })
 
 // A blocked font or script (CSP) or a crash shows up as a console error. A 503
-// the offline test fakes is a network message, not a page error.
+// the offline test fakes is expected; a 404 for a font or script is not.
 const errors: string[] = []
 test.beforeEach(async ({ page }) => {
   errors.length = 0
   page.on('pageerror', (e) => errors.push(e.message))
-  page.on('console', (m) => { if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errors.push(m.text()) })
+  page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource: .* 503/.test(m.text())) errors.push(m.text()) })
   await page.goto('/')
   await expect(page.getByTestId('controller')).toHaveText(/Controller connected/)
 })
