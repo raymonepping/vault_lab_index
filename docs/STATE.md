@@ -203,3 +203,17 @@ findings. No tracked file holds an em dash now.
 Results: `make verify` green (27 unit, boundary 26/26, typecheck, gitleaks);
 `make test-ui` 16/16 (axe 0, no console errors); `vlix-ui` rebuilt by the
 stamp after the CSS change, healthy.
+
+### Round 5 (after 625c16b): zero to-dos
+
+ponytail-audit (whole repo), ponytail-review (625c16b), backend-design audit
+and security pass: no findings. 23 findings fixed over rounds 1 to 4.
+
+Final results: `make verify` green (shellcheck, 27 unit tests, boundary
+26/26, typecheck, gitleaks no leaks); `make test-ui` 16/16 (axe WCAG 2.1 AA
+0 violations at 1440 and 390, no console errors); the portal runs at
+`http://127.0.0.1:18800` (`vlix-ui` healthy, controller healthy).
+
+Open for the user: `article/One-Command-Three-Responsibilities.md` is in the
+history of the public repo through b6683ae (untracked since 343624c).
+Removing it from history needs a force-push.
