@@ -5,6 +5,7 @@ SHELL := /bin/bash
 RUNTIME ?= podman
 IMAGE := vlix-ui:local
 -include config/defaults.conf
+-include .env
 export NODE_IMAGE
 
 ifneq ($(RUNTIME),podman)

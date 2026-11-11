@@ -1,10 +1,11 @@
-// ui/server/api/[...path].ts: forwards exactly four calls to the controller
+// ui/server/api/[...path].ts: forwards exactly three calls to the controller
 // (prompt 02). Anything else is 404; a mutation from another origin is 403.
+// The browser reads the operation from GET labs; GET operation stays on the
+// controller for scripts and tests only.
 import type { H3Event } from 'h3'
 
 const ROUTES: Array<[string, RegExp]> = [
   ['GET', /^labs$/],
-  ['GET', /^operation$/],
   ['POST', /^refresh$/],
   ['POST', /^labs\/(?!\.+\/)[A-Za-z0-9_.-]+\/(up|down)$/],
 ]

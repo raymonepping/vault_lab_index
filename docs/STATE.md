@@ -127,3 +127,32 @@ Fixed after the live run:
   older than 5 s, so the rack lights follow the start.
 - The redactor blanked the word after `data-secrets:` in one line. Over-
   redaction is the safe side; kept.
+
+## Prompt 05: clean rounds
+
+### Round 1 (after b6683ae)
+
+Reviews: ponytail-audit (1 to 7), ponytail-review (8 to 11),
+backend-design audit (12), security-discipline (13).
+
+| # | Finding | Fix |
+| --- | --- | --- |
+| 1 | Dashboard had no `Host` check: DNS rebinding could pass the Origin check | `ui/server/middleware/host.ts` with `VLIX_ALLOWED_HOSTS`; 3 boundary checks |
+| 2 | `make up` printed the wrong URL when `.env` set the port | `-include .env` |
+| 3 | README: Starting also means a first health check | README row |
+| 4 | No test caught a blocked font or script | e2e asserts no console or page errors |
+| 5 | Dashboard forwarded `GET operation`, which the browser never calls | route removed; boundary check |
+| 6 | README link not URL-encoded | `encodeURI` |
+| 7 | `ui/.dockerignore` duplicated `.containerignore` | deleted |
+| 8 | `commit_gh` published the private `article/` draft | untracked, `article/` ignored; history is the user's call |
+| 9 | Boundary leak check used `grep -q` after a pipe under pipefail | body read first, then compared |
+| 10 | 5 s re-observe during an operation untested | server test with an injected clock |
+| 11 | README overstated who holds the token | wording matches the security model |
+| 12 | Refresh failures were swallowed | `refresh_failed` events |
+| 13 | Plain HTTP and no login on loopback not recorded | security model "Limits" |
+
+The controller's Host allowlist now comes from the port it listens on, which
+also removed the test's double start.
+
+Results: `make verify` green (27 unit, boundary 26/26, typecheck, gitleaks);
+`make test-ui` 16/16; `vlix-ui` rebuilt, healthy, `Host: evil.example` 400.

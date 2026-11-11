@@ -21,14 +21,13 @@ const spawnFn = (cmd, args) => {
   return child;
 };
 const runFn = async () => JSON.stringify([{ Names: ['alp-web'], State: 'running', Status: 'Up', ExitCode: 0 }]);
-const c = createController({ root, port: 0, refreshS: 15, timeoutMs: 60_000, overrides, token: 'test-token', spawnFn, runFn });
+let podmanCalls = 0;
+let clock = Date.now();
+const counted = async () => { podmanCalls++; return runFn(); };
+const c = createController({ root, refreshS: 15, timeoutMs: 60_000, overrides, token: 'test-token', spawnFn, runFn: counted, now: () => clock });
 await new Promise((ok) => c.server.listen(0, '127.0.0.1', ok));
 const port = c.server.address().port;
-// The Host allowlist is built from the configured port; rebuild with the real one.
-c.server.close();
-const c2 = createController({ root, port, refreshS: 15, timeoutMs: 60_000, overrides, token: 'test-token', spawnFn, runFn });
-await new Promise((ok) => c2.server.listen(port, '127.0.0.1', ok));
-after(() => c2.server.close());
+after(() => c.server.close());
 
 const auth = { authorization: 'Bearer test-token' };
 const req = (path, { method = 'GET', headers = {}, body } = {}) =>
@@ -86,6 +85,14 @@ test('up runs make for the registered dir; a second one is refused with 409', as
   assert.deepEqual(spawned[0].args, ['-C', join(root, 'bravo_lab').replace(/^\/var\//, '/private/var/'), 'up', 'RUNTIME=podman']);
   const labs = await (await req('/api/labs', { headers: auth })).json();
   assert.equal(labs.labs.find((l) => l.id === 'bravo_lab').status, 'starting');
+  // While make runs, a read older than 5 s asks podman again; a fresh one does not.
+  const before = podmanCalls;
+  clock += 6000;
+  await req('/api/labs', { headers: auth });
+  assert.equal(podmanCalls, before + 1, 'a look older than 5 s during an operation refreshes');
+  clock += 1000;
+  await req('/api/labs', { headers: auth });
+  assert.equal(podmanCalls, before + 1, 'a look 1 s old is reused');
   const busy = await post('/api/labs/alpha_lab/down');
   assert.equal(busy.status, 409);
   assert.equal((await busy.json()).operation.lab, 'bravo_lab');

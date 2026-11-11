@@ -14,9 +14,9 @@ What the portal trusts, what it refuses, and what it does not protect.
    rebinding).
 4. `vlix-ui` mounts only the token directory, read-only. Its server adds the
    token; the browser never receives it (`scripts/boundary.sh` greps for it).
-5. The dashboard forwards four calls: `GET labs`, `GET operation`,
-   `POST refresh`, `POST labs/<id>/up|down`. A POST needs the dashboard's own
-   `Origin` and `application/json`.
+5. The dashboard answers only to its own `Host` names and forwards three
+   calls: `GET labs`, `POST refresh`, `POST labs/<id>/up|down`. A POST needs
+   the dashboard's own `Origin` and `application/json`.
 6. A lab id is a key in the registry, never part of a path. Before each
    operation the lab is discovered again from its files.
 7. The controller runs exactly `make -C <dir> up|down RUNTIME=podman`, with no
@@ -40,3 +40,8 @@ What the portal trusts, what it refuses, and what it does not protect.
   the browser of the person who started the lab, on loopback.
 - The portal trusts each lab's Makefile; it runs what that file says `up`
   and `down` do.
+- Both parts speak plain HTTP on 127.0.0.1, with no TLS and no HSTS: nothing
+  leaves the machine, and browsers treat loopback as a secure context. The
+  dashboard has no login: any browser tab on this Mac is you. What stops a
+  web page from using it is the `Host` allowlist (DNS rebinding), the
+  same-origin check on every POST, and the CSP.

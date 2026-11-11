@@ -40,7 +40,9 @@ check "body over 1 KiB" 413 "${auth[@]}" -X POST -H 'content-type: application/j
 check "start a stopped fixture lab" 202 "${auth[@]}" "${post[@]}" "$C/api/labs/bravo_lab/up"
 check "a second operation while one runs" 409 "${auth[@]}" "${post[@]}" "$C/api/labs/alpha_lab/down"
 for _ in $(seq 60); do
-  curl -s "${auth[@]}" "$C/api/operation" | grep -q '"state":"running"' || break
+  # Read the body first: grep -q after a pipe under pipefail can SIGPIPE curl.
+  op=$(curl -s "${auth[@]}" "$C/api/operation")
+  [[ $op == *'"state":"running"'* ]] || break
   sleep 0.25
 done
 
@@ -53,11 +55,15 @@ check "text/plain from its own origin" 415 -X POST -H "Origin: $U" -H 'content-t
 check "an unknown api path" 404 "$U/api/labs/alpha_lab/reset"
 check "GET on a mutation" 404 "$U/api/labs/alpha_lab/up"
 check "dot-dot through the proxy" 404 "${post[@]}" -H "Origin: $U" "$U/api/labs/../up"
+check "GET operation is not forwarded" 404 "$U/api/operation"
+check "another Host (DNS rebinding)" 400 -H 'Host: evil.example:18810' "$U/api/labs"
+check "a rebinding POST with matching Origin" 400 "${post[@]}" -H 'Host: evil.example:18810' -H 'Origin: http://evil.example:18810' "$U/api/labs/bravo_lab/down"
 
 token=$(cat "$TOKEN_FILE")
 leak=0
-for path in / /api/labs /api/operation /healthz; do
-  if curl -s "$U$path" | grep -qF "$token"; then leak=1; fi
+for path in / /api/labs /healthz; do
+  body=$(curl -s "$U$path")
+  [[ $body == *"$token"* ]] && leak=1
 done
 if [[ $leak == 0 ]]; then pass=$((pass + 1)); echo "  ok    the token never reaches the browser"
 else fail=$((fail + 1)); echo "  FAIL  the token reached the browser"; fi

@@ -19,12 +19,20 @@ const waitIdle = (page: Page) => expect(page.getByTestId('hero-op')).toHaveCount
 
 test.describe.configure({ mode: 'serial' })
 
+test.afterEach(() => { expect(errors).toEqual([]) })
+
 // Fresh fixture labs for each project (desktop, then phone).
 test.beforeAll(() => {
   execFileSync(`${ROOT}scripts/fixture.sh`, ['start'], { cwd: ROOT, env: { ...process.env, FAKE_MAKE_MS: '1500' }, stdio: 'ignore' })
 })
 
+// A blocked font or script (CSP) or a crash shows up as a console error. A 503
+// the offline test fakes is a network message, not a page error.
+const errors: string[] = []
 test.beforeEach(async ({ page }) => {
+  errors.length = 0
+  page.on('pageerror', (e) => errors.push(e.message))
+  page.on('console', (m) => { if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errors.push(m.text()) })
   await page.goto('/')
   await expect(page.getByTestId('controller')).toHaveText(/Controller connected/)
 })

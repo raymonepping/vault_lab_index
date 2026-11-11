@@ -26,6 +26,7 @@ start)
   echo $! >"$RUN/controller.pid"
   for _ in $(seq 50); do curl -sf 127.0.0.1:18811/healthz >/dev/null && break; sleep 0.1; done
   VLIX_CONTROLLER_URL=http://127.0.0.1:18811 VLIX_TOKEN_FILE="$PWD/$RUN/token/controller.token" PORT=18810 HOST=127.0.0.1 \
+    VLIX_ALLOWED_HOSTS=127.0.0.1:18810,localhost:18810 \
     nohup node ui/.output/server/index.mjs >"$RUN/ui.log" 2>&1 &
   echo $! >"$RUN/ui.pid"
   for _ in $(seq 50); do curl -sf 127.0.0.1:18810/healthz >/dev/null && break; sleep 0.1; done

@@ -49,7 +49,7 @@ const headingId = computed(() => `lab-${props.lab.id}`)
         <a :href="u" target="_blank" rel="noopener noreferrer"><ExternalLink :size="12" aria-hidden="true" />{{ host(u) }}<span class="sr-only"> (opens in a new tab)</span></a>
       </li>
       <li v-if="lab.readme">
-        <a :href="`vscode://file${lab.readme}`"><FileText :size="12" aria-hidden="true" />README<span class="sr-only"> for {{ lab.name }}, in VS Code</span></a>
+        <a :href="`vscode://file${encodeURI(lab.readme)}`"><FileText :size="12" aria-hidden="true" />README<span class="sr-only"> for {{ lab.name }}, in VS Code</span></a>
       </li>
     </ul>
 

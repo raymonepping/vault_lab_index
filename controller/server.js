@@ -29,8 +29,7 @@ const run = (cmd, args) => new Promise((ok, fail) => {
   execFile(cmd, args, { timeout: 10_000, maxBuffer: 16 << 20 }, (err, stdout) => (err ? fail(err) : ok(stdout)));
 });
 
-export function createController({ root, port, refreshS, timeoutMs, overrides, self, token, spawnFn = spawn, runFn = run, now = Date.now }) {
-  const hosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`, `host.containers.internal:${port}`]);
+export function createController({ root, refreshS, timeoutMs, overrides, self, token, spawnFn = spawn, runFn = run, now = Date.now }) {
   const tokenBuf = Buffer.from(`Bearer ${token}`);
   let registry = { labs: [], excluded: [] };
   let observed = new Map();
@@ -39,7 +38,7 @@ export function createController({ root, port, refreshS, timeoutMs, overrides, s
 
   const runner = createRunner({
     spawn: spawnFn, now, timeoutMs, log,
-    onEnd: () => { refresh().catch(() => {}); },
+    onEnd: () => { refresh().catch((e) => log('refresh_failed', { message: String(e.message).slice(0, 200) })); },
   });
 
   async function rediscover() {
@@ -107,7 +106,7 @@ export function createController({ root, port, refreshS, timeoutMs, overrides, s
 
   async function handle(req, res) {
     const url = new URL(req.url, 'http://controller');
-    if (!hosts.has(req.headers.host ?? '')) return fail(res, 400, 'bad-host', 'unexpected Host header');
+    if (!hostOk(req.headers.host)) return fail(res, 400, 'bad-host', 'unexpected Host header');
     if (req.headers.origin !== undefined) return fail(res, 403, 'forbidden-origin', 'browsers do not call the controller');
     if (req.method === 'GET' && url.pathname === '/healthz') return send(res, 200, { ok: true });
     if (!authorized(req)) return fail(res, 401, 'unauthorized', 'missing or wrong token');
@@ -142,6 +141,12 @@ export function createController({ root, port, refreshS, timeoutMs, overrides, s
     return fail(res, 404, 'not-found', 'no such route');
   }
 
+  // The names this controller answers to, on the port it listens on (DNS rebinding).
+  const hostOk = (host) => {
+    const p = server.address()?.port;
+    return [`127.0.0.1:${p}`, `localhost:${p}`, `host.containers.internal:${p}`].includes(host ?? '');
+  };
+
   const server = createServer((req, res) => {
     handle(req, res).catch((e) => {
       log('request_failed', { message: String(e.message).slice(0, 200) });
@@ -168,10 +173,10 @@ async function main() {
   writeFileSync(tokenFile, token, { mode: 0o600 });
   chmodSync(tokenFile, 0o600);
 
-  const c = createController({ root, port, refreshS, timeoutMs: Number(conf.VLIX_OP_TIMEOUT_S ?? 1800) * 1000, overrides, self: project, token });
+  const c = createController({ root, refreshS, timeoutMs: Number(conf.VLIX_OP_TIMEOUT_S ?? 1800) * 1000, overrides, self: project, token });
   await c.refresh();
   log('labs_discovered', { eligible: c.registry().labs.length, excluded: c.registry().excluded.length });
-  const timer = setInterval(() => c.refresh().catch(() => {}), refreshS * 1000);
+  const timer = setInterval(() => c.refresh().catch((e) => log('refresh_failed', { message: String(e.message).slice(0, 200) })), refreshS * 1000);
   c.server.listen(port, '127.0.0.1', () => log('controller_started', { port, root }));
 
   let stopping = false;

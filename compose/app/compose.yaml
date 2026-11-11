@@ -7,6 +7,8 @@ services:
     container_name: vlix-ui
     environment:
       VLIX_CONTROLLER_URL: http://host.containers.internal:${VLIX_CONTROLLER_PORT}
+      # The names the browser and the health check use; anything else is refused.
+      VLIX_ALLOWED_HOSTS: 127.0.0.1:${VLIX_UI_PORT},localhost:${VLIX_UI_PORT},127.0.0.1:3000
     ports:
       - "127.0.0.1:${VLIX_UI_PORT}:3000"
     volumes:

@@ -78,7 +78,7 @@ Status comes from podman, filtered by the lab's prefix. A successful
 | --- | --- |
 | Running | at least one container runs, none unhealthy, none crashed |
 | Stopped | no container runs (a stopped lab may keep its exited containers) |
-| Starting, Stopping | the portal's `make up` or `make down` is running |
+| Starting, Stopping | the portal's `make up` or `make down` is running; Starting also while running containers pass their first health check |
 | Partial | some run, and some are stopped, crashed or unhealthy |
 | Failed | the last `make up` or `make down` from the portal failed |
 | Unknown | podman did not answer |
@@ -99,8 +99,8 @@ stops it, which can leave the lab half up. Run its `make up` again.
 ## Trust boundary
 
 See `docs/security-model.md`. In short: both parts listen on 127.0.0.1 only,
-every controller call needs a token that only `vlix-ui`'s server holds, the
-browser can ask for four things only, and the only commands the controller
+every controller call needs a token kept in a file only your user can read, which `vlix-ui`'s server adds for the browser, the
+browser can ask for three things only, and the only commands the controller
 can run are the two above.
 
 ## Where things are
