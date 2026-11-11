@@ -189,3 +189,17 @@ findings.
 Results: `make verify` green (27 unit, boundary 26/26, typecheck, gitleaks);
 `make test-ui` 16/16; the rebuilt `vlix-ui` serves "The Podman labs" and "–"
 before hydration.
+
+### Round 4 (after 669c8aa)
+
+| # | Finding | Fix |
+| --- | --- | --- |
+| 22 | The published `main.css` carried 11 em dashes in comments | vault_pipeline's cleaned copy (identical styles) |
+| 23 | Three em dashes in `.gitignore` comments | colons |
+
+ponytail-review of 669c8aa, the backend audit and the security pass: no
+findings. No tracked file holds an em dash now.
+
+Results: `make verify` green (27 unit, boundary 26/26, typecheck, gitleaks);
+`make test-ui` 16/16 (axe 0, no console errors); `vlix-ui` rebuilt by the
+stamp after the CSS change, healthy.

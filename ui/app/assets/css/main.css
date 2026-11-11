@@ -1,7 +1,7 @@
-/* vault-glass.css — the "Vault daylight glass" design system.
+/* vault-glass.css: the "Vault daylight glass" design system.
  *
  * Canonical source: HashiCorp/Vault/arcanium (arcanium/ui/app/assets/css/main.css,
- * docs/frontend/config/DESIGN.md) — same family as Project Durin and Editors
+ * docs/frontend/config/DESIGN.md): same family as Project Durin and Editors
  * Factory. Prefix --arc-/.arc- renamed to --vg-/.vg- for reuse.
  *
  * Use with Tailwind v4 + self-hosted fonts:
@@ -22,17 +22,17 @@
 /* ── Design tokens ──────────────────────────────────────────────────────── */
 /* World: daylight glass (the Durin / Editors Factory family). Black ink on
  * frosted panes over a pale, window-lit ground; each page's hero is the one
- * ink-glass panel. Each project keeps strong semantic colours —
- * action blue, governance amber, healthy green, critical red — deepened so
+ * ink-glass panel. Each project keeps strong semantic colours , 
+ * action blue, governance amber, healthy green, critical red: deepened so
  * every one clears AA as text on glass and on the bare ground.
  * Contrast (text on glass #f6f8fa / on ground #e6ecf2):
  *   primary #0f1a2a 16.4 / 14.7   secondary #2f3d50 10.4 / 9.3
  *   muted   #475569  7.1 / 6.4    dim       #56657a  5.6 / 5.0
  *   blue #025a8c 6.9 · amber #a14a06 5.6 · green #0f652b 6.8 · red #b01818 6.6
- *   (text tokens stay >= 4.5:1 on their own 10-15% tint too — axe-verified)
+ *   (text tokens stay >= 4.5:1 on their own 10-15% tint too: axe-verified)
  * Never define a meaning-bearing colour below AA for its text size. */
 :root {
-  /* Hues — the single source for every tint. Components mix these with
+  /* Hues: the single source for every tint. Components mix these with
    * transparent (color-mix) instead of hardcoding rgba() literals. */
   --vg-hue-blue:        #0369a1;
   --vg-hue-cyan:        #0e7490;
@@ -194,7 +194,7 @@ input, textarea { caret-color: var(--vg-action-primary); }
   border-radius: 6px;
 }
 
-/* Prompt 16.5 — several inputs zero their outline for the mouse (border-colour
+/* Prompt 16.5: several inputs zero their outline for the mouse (border-colour
    is the only affordance). Keyboard focus must still show the ring. --vg-focus
    (#90e0ef) is > 3:1 against every panel background it lands on. */
 .vg-palette__input:focus-visible,
@@ -726,7 +726,7 @@ a:hover { color: var(--vg-focus); }
 
 /* ── Glass, hero, tiles, motion ──────────────────── */
 
-/* Glass panel — translucent, inset highlight, soft drop shadow */
+/* Glass panel: translucent, inset highlight, soft drop shadow */
 .vg-glass {
   background: var(--vg-glass);
   border: 1px solid var(--vg-glass-border);
@@ -736,7 +736,7 @@ a:hover { color: var(--vg-focus); }
   box-shadow: var(--vg-shadow-md), inset 0 1px 0 var(--vg-glass-hi), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-/* Ink hero band — the page's one dark pane (tokens re-scoped above) */
+/* Ink hero band: the page's one dark pane (tokens re-scoped above) */
 .vg-hero {
   position: relative;
   overflow: hidden;
@@ -758,7 +758,7 @@ a:hover { color: var(--vg-focus); }
 }
 .vg-hero > * { position: relative; z-index: 1; }
 
-/* KPI tile — large tabular figure, quiet label, accent underglow */
+/* KPI tile: large tabular figure, quiet label, accent underglow */
 .vg-tile {
   position: relative;
   background: var(--vg-glass);
@@ -813,7 +813,7 @@ a:hover { color: var(--vg-focus); }
   animation: vgPulse 2.4s ease infinite;
 }
 
-/* View Transitions — restrained cross-fade for entity navigation */
+/* View Transitions: restrained cross-fade for entity navigation */
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.22s; }
 }

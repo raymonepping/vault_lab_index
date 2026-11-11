@@ -2,7 +2,8 @@
 
 The dashboard follows **Vault daylight glass**, the house system of every
 Vault project (canonical: Arcanium, `docs/frontend/config/DESIGN.md`).
-`ui/app/assets/css/main.css` is the system's `vault-glass.css`, unchanged;
+`ui/app/assets/css/main.css` is the system's `vault-glass.css` (the copy
+vault_pipeline ships, with its comments free of em dashes);
 `ui/app/assets/css/index.css` holds this page and uses only its tokens.
 
 ## Identity
