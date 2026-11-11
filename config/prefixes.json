@@ -1,0 +1,6 @@
+{
+  "_comment": "Prefixes for labs that record none in their own CLAUDE.md or AGENTS.md (D8). A lab's own record wins.",
+  "editors_factory": "factory-",
+  "project_durin": "durin-",
+  "secret_rotation": "srot-"
+}

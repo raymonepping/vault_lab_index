@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+// Fake podman for fixture mode: answers `ps -a --format json --filter name=^p-`
+// from each fixture lab's .fake-state. Anything else fails.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { ELIGIBLE } from '../fixtures.js';
+
+const args = process.argv.slice(2);
+if (args.slice(0, 4).join(' ') !== 'ps -a --format json') { console.error('fake podman: only ps'); process.exit(125); }
+const prefixes = args.filter((a) => a.startsWith('name=^')).map((a) => a.slice(6));
+const root = process.env.VLIX_LABS_ROOT;
+const c = (Names, State, Status, ExitCode = 0) => ({ Names: [Names], State, Status, ExitCode });
+const out = [];
+for (const [name, lab] of Object.entries(ELIGIBLE)) {
+  if (!prefixes.includes(lab.prefix)) continue;
+  let state;
+  try { state = readFileSync(join(root, name, '.fake-state'), 'utf8').trim(); } catch { continue; }
+  const p = lab.prefix;
+  if (state === 'running') out.push(c(`${p}vault_1`, 'running', 'Up 4 minutes (healthy)'), c(`${p}vault_2`, 'running', 'Up 4 minutes (healthy)'), c(`${p}app`, 'running', 'Up 3 minutes'), c(`${p}volume_init`, 'exited', 'Exited (0) 4 minutes ago'));
+  if (state === 'stopped') out.push(c(`${p}vault_1`, 'exited', 'Exited (0) 2 hours ago'), c(`${p}app`, 'exited', 'Exited (0) 2 hours ago'));
+  if (state === 'partial') out.push(c(`${p}vault_1`, 'running', 'Up 9 minutes (healthy)'), c(`${p}vault_2`, 'running', 'Up 9 minutes'), c(`${p}app`, 'exited', 'Exited (1) 2 minutes ago', 1));
+  if (state === 'unhealthy') out.push(c(`${p}vault_1`, 'running', 'Up 1 hour (unhealthy)'), c(`${p}app`, 'running', 'Up 1 hour'));
+}
+console.log(JSON.stringify(out));

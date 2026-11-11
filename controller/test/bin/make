@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+// Fake make for fixture mode: `make -C <dir> up|down RUNTIME=podman` flips the
+// fixture lab's .fake-state after a few printed lines. It never runs anything.
+import { readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const [flag, dir, action, runtime] = process.argv.slice(2);
+if (flag !== '-C' || !['up', 'down'].includes(action) || runtime !== 'RUNTIME=podman') {
+  console.error(`fake make: unexpected arguments ${process.argv.slice(2).join(' ')}`);
+  process.exit(64);
+}
+const failing = /up down: ## both\n\t@exit 2/.test(readFileSync(join(dir, 'Makefile'), 'utf8'));
+const ms = Number(process.env.FAKE_MAKE_MS ?? 3000);
+const lines = action === 'up'
+  ? ['phase seal: starting', 'phase vault: 3 nodes unsealed', 'login ok, token hvs.CAESIFAKEFAKEFAKEFAKEFAKEFAKE0123', 'phase app: console ready']
+  : ['stopping app', 'stopping vault (volumes kept)', 'stopped'];
+let i = 0;
+const step = () => {
+  if (i < lines.length) { console.log(lines[i++]); setTimeout(step, ms / (lines.length + 1)); return; }
+  if (failing && action === 'up') { console.error('make: *** [up] Error 2'); process.exit(2); }
+  writeFileSync(join(dir, '.fake-state'), action === 'up' ? 'running' : 'stopped');
+  process.exit(0);
+};
+step();

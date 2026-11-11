@@ -223,3 +223,13 @@ kube/config
 # AI assistant tooling (local only)
 AGENTS.md
 AGENTS.override.md
+
+# Lab Index: private and generated
+prompts/
+input/
+.build/
+ui/.output/
+ui/.nuxt/
+ui/.data/
+e2e/test-results/
+e2e/playwright-report/

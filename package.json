@@ -1,0 +1,12 @@
+{
+  "name": "vault_lab_index",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Lab Index: start, stop and watch the Podman labs next to this one.",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "controller": "node controller/server.js",
+    "test": "node --test 'controller/test/*.test.js'"
+  }
+}
