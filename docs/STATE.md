@@ -175,3 +175,17 @@ Results: `make verify` green (27 unit, boundary 26/26, typecheck, gitleaks);
 on the second run; with the controller stopped, `vlix-ui` logged
 `controller_offline` (`no token file`) and answered 503; `Host:
 evil.example` 400.
+
+### Round 3 (after 746b34b)
+
+| # | Finding | Fix |
+| --- | --- | --- |
+| 20 | The hero named `HashiCorp/Vault`, which the portal never reads (`VLIX_LABS_ROOT` decides) | "next to this portal" |
+| 21 | Found while checking 20: the server-rendered page showed "0 Podman labs" and zero tiles until the first answer | "The Podman labs" and "–" until data arrives |
+
+ponytail-review of 746b34b, the backend audit and the security pass: no new
+findings.
+
+Results: `make verify` green (27 unit, boundary 26/26, typecheck, gitleaks);
+`make test-ui` 16/16; the rebuilt `vlix-ui` serves "The Podman labs" and "–"
+before hydration.

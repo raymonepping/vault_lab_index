@@ -143,7 +143,7 @@ onBeforeUnmount(() => { clearTimeout(timer); clearInterval(tick); document.remov
         <div class="hero__text">
           <h1 id="hero-title" class="hero__title">The labs next door</h1>
           <p class="hero__sub">
-            {{ labs.length }} Podman labs in <code>HashiCorp/Vault</code>, each started and stopped by its own
+            {{ data ? `${labs.length} Podman labs` : 'The Podman labs' }} next to this portal, each started and stopped by its own
             <code>make up</code> and <code>make down</code>.
           </p>
           <p v-if="op && opRunning" class="hero__op" data-testid="hero-op">
@@ -152,9 +152,9 @@ onBeforeUnmount(() => { clearTimeout(timer); clearInterval(tick); document.remov
           </p>
         </div>
         <dl class="hero__counts">
-          <div class="vg-tile hero__tile"><dt class="vg-tile__label">Running</dt><dd class="vg-tile__value" data-testid="count-running">{{ counts.running }}</dd></div>
-          <div class="vg-tile vg-tile--muted hero__tile"><dt class="vg-tile__label">Stopped</dt><dd class="vg-tile__value" data-testid="count-stopped">{{ counts.stopped }}</dd></div>
-          <div class="vg-tile vg-tile--gold hero__tile"><dt class="vg-tile__label">Need a look</dt><dd class="vg-tile__value vg-tile__value--gold" data-testid="count-attention">{{ counts.attention }}</dd></div>
+          <div class="vg-tile hero__tile"><dt class="vg-tile__label">Running</dt><dd class="vg-tile__value" data-testid="count-running">{{ data ? counts.running : '–' }}</dd></div>
+          <div class="vg-tile vg-tile--muted hero__tile"><dt class="vg-tile__label">Stopped</dt><dd class="vg-tile__value" data-testid="count-stopped">{{ data ? counts.stopped : '–' }}</dd></div>
+          <div class="vg-tile vg-tile--gold hero__tile"><dt class="vg-tile__label">Need a look</dt><dd class="vg-tile__value vg-tile__value--gold" data-testid="count-attention">{{ data ? counts.attention : '–' }}</dd></div>
         </dl>
       </section>
 
